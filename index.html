@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Investing Game Simulator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #game {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 800px;
+        }
+        #balanceWidget {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        button {
+            background-color: #4CAF50; /* Green */
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        div.investment {
+            background-color: #f9f9f9;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        div.investment:hover {
+            background-color: #f0f0f0;
+        }
+        #newsFeed {
+            margin-top: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        /* Responsive styles */
+        @media (max-width: 600px) {
+            #game {
+                width: 100%;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game">
+        <h1>Investing Game Simulator</h1>
+        <div id="balanceWidget">Your balance: $<span id="balance">1000</span></div>
+        <div id="investments"></div>
+        <div id="financialStatement"></div>
+        <div id="newsFeed"></div>
+        <button id="nextMonth">Next month</button>
+    </div>
+
+    <script>
+        var balance = 1000;
+        var transactions = [];
+        var investments = [
+            {name: 'TESLA Stock', price: 700, volatility: 0.02},
+            {name: 'Microsoft Stock', price: 300, volatility: 0.01},
+            {name: 'Amazon Stock', price: 3300, volatility: 0.03},
+            {name: 'US Government Bond', price: 1000, volatility: 0.005},
+            {name: 'Mutual Fund XYZ', price: 500, volatility: 0.015},
+            {name: 'Gold ETF', price: 1800, volatility: 0.02},
+            {name: 'Real Estate Investment Trust ABC', price: 1500, volatility: 0.025},
+            {name: 'Bitcoin', price: 60000, volatility: 0.05},
+            {name: 'Oil Futures', price: 70, volatility: 0.03},
+            // Add more investments here
+        ];
+        var news = [
+            /* Your news goes here */
+        ];
+        var month = 0;
+
+        function invest(investmentIndex) {
+            var investment = investments[investmentIndex];
+            if (balance >= investment.price) {
+                balance -= investment.price;
+                transactions.push({type: 'Investment', name: investment.name, amount: -investment.price});
+                updateFinancialStatement();
+                document.getElementById('balance').innerText = balance;
+
+                // Simulate investment return after 2 seconds
+                setTimeout(function() {
+                    var returnRate = Math.random() * (2 * investment.volatility) + 1 - investment.volatility;  // Random return rate based on investment volatility
+                    var returnAmount = investment.price * returnRate;
+                    balance += returnAmount;
+                    transactions.push({type: 'Return', name: investment.name, amount: returnAmount});
+                    updateFinancialStatement();
+                    document.getElementById('balance').innerText = balance.toFixed(2);
+                }, 2000);
+            } else {
+                alert('Not enough balance to invest.');
+            }
+        }
+
+        function updateFinancialStatement() {
+            var financialStatementDiv = document.getElementById('financialStatement');
+            financialStatementDiv.innerHTML = '';  // Clear the financial statement
+            for (var i = 0; i < transactions.length; i++) {
+                var transaction = transactions[i];
+                var transactionDiv = document.createElement('div');
+                transactionDiv.innerText = transaction.type + ' in ' + transaction.name + ': $' + transaction.amount.toFixed(2);
+                financialStatementDiv.appendChild(transactionDiv);
+            }
+        }
+
+        function nextMonth() {
+            month++;
+            for (var i = 0; i < investments.length; i++) {
+                var investment = investments[i];
+                // Simulate price change
+                var priceChangeRate = Math.random() * (2 * investment.volatility) + 1 - investment.volatility;  // Random price change rate based on investment volatility
+                investment.price *= priceChangeRate;
+            }
+            updateInvestments();
+            updateNews();
+        }
+
+        function updateInvestments() {
+            var investmentsDiv = document.getElementById('investments');
+            investmentsDiv.innerHTML = '';  // Clear the investments
+            for (var i = 0; i < investments.length; i++) {
+                var investment = investments[i];
+                var investmentDiv = document.createElement('div');
+                investmentDiv.className = 'investment';
+                investmentDiv.innerText = investment.name + ': $' + investment.price.toFixed(2);
+                var investButton = document.createElement('button');
+                investButton.innerText = 'Invest';
+                investButton.addEventListener('click', (function(investmentIndex) {
+                    return function() {
+                        invest(investmentIndex);
+                    };
+                })(i));
+                investmentDiv.appendChild(investButton);
+                investmentsDiv.appendChild(investmentDiv);
+            }
+        }
+
+        function updateNews() {
+            var newsFeedDiv = document.getElementById('newsFeed');
+            newsFeedDiv.innerHTML = '';  // Clear the news feed
+            for (var i = 0; i < news.length; i++) {
+                var newsItem = news[i];
+                var newsItemDiv = document.createElement('div');
+                newsItemDiv.innerText = newsItem;
+                newsFeedDiv.appendChild(newsItemDiv);
+            }
+        }
+
+        // Display investments
+        updateInvestments();
+
+        // Display news
+        updateNews();
+
+        // Add event listener to nextMonth button
+        document.getElementById('nextMonth').addEventListener('click', nextMonth);
+    </script>
+</body>
+</html>
